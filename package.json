@@ -1,0 +1,19 @@
+{
+  "name": "@oryksa/sdk",
+  "version": "0.1.0",
+  "description": "ORYKSA AI Employees SDK: chat API, knowledge (Brain), webhooks and an in-app chat for web, Node and Electron.",
+  "type": "module",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": { ".": { "types": "./src/index.d.ts", "import": "./src/index.js" } },
+  "files": ["src", "README.md", "LICENSE"],
+  "engines": { "node": ">=18" },
+  "sideEffects": false,
+  "scripts": { "test": "node test/live.test.js" },
+  "keywords": ["oryksa", "ai", "chatbot", "customer-support", "ai-agent", "whatsapp", "mcp", "sdk"],
+  "homepage": "https://developers.oryksa.com",
+  "repository": { "type": "git", "url": "https://github.com/oryksa/oryksa-js" },
+  "author": "Weslley Harakawa (https://github.com/WeslleyHarakawa)",
+  "license": "MIT"
+}

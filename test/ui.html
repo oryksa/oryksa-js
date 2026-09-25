@@ -1,0 +1,7 @@
+<!doctype html><html><head><meta charset="utf-8"><title>FitTrack web app</title></head>
+<body style="font-family:system-ui;padding:40px"><h1>FitTrack</h1><p>Demo web app using @oryksa/sdk mountChat()</p>
+<script type="module">
+import { OryksaClient, mountChat } from "/src/index.js";
+const token = new URLSearchParams(location.search).get("t");
+window.chat = mountChat({ client: new OryksaClient({ token }), lang: "en", open: true });
+</script></body></html>
