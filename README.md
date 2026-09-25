@@ -4,7 +4,7 @@
 
 Official JavaScript and TypeScript SDK for **ORYKSA AI Employees**: put an AI employee that already knows the business inside your web app, Node backend or Electron desktop app. Same brain as WhatsApp and the website chat, text and voice.
 
-- Docs: https://developers.oryksa.com
+- Docs: https://developer.oryksa.com
 - API: `https://api.oryksa.com/v1`
 
 ## Install
@@ -17,7 +17,7 @@ npm install @oryksa/sdk
 
 ```js
 import { Oryksa } from "@oryksa/sdk";
-const oryksa = new Oryksa(process.env.ORYKSA_API_KEY); // Account > Developers
+const oryksa = new Oryksa(process.env.ORYKSA_API_KEY); // Account > Developer
 
 const r = await oryksa.chat({ message: "Are you open on Saturday?" });
 console.log(r.reply, r.conversation_id);

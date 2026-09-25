@@ -2,7 +2,7 @@
  * @oryksa/sdk - ORYKSA AI Employees SDK for JavaScript and TypeScript.
  * Server client (secret API key), webhook verification, and an in-app chat
  * client that only uses short-lived session tokens (never the secret key).
- * Docs: https://developers.oryksa.com   License: MIT
+ * Docs: https://developer.oryksa.com   License: MIT
  */
 
 const DEFAULT_BASE = "https://api.oryksa.com/v1";
@@ -54,7 +54,7 @@ async function request(base, token, method, path, body, fetchImpl, timeoutMs) {
 export class Oryksa {
   constructor(apiKey, opts = {}) {
     if (!apiKey || !String(apiKey).startsWith("oryk_live_")) {
-      throw new Error("An ORYKSA API key (oryk_live_...) is required. Create one in Account > Developers.");
+      throw new Error("An ORYKSA API key (oryk_live_...) is required. Create one in Account > Developer.");
     }
     if (typeof window !== "undefined" && typeof document !== "undefined" && !opts.dangerouslyAllowBrowser) {
       throw new Error("The secret API key must stay on the server. In apps use OryksaClient with a session token.");
