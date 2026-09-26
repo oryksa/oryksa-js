@@ -61,8 +61,15 @@ app.post("/oryksa-webhook", express.raw({ type: "application/json" }), async (re
 
 Every failed call throws `OryksaError` with `status`, `code` (for example `interaction_limit_reached`, `rate_limited`, `plan_required`) and `message`.
 
-## Author
+## About the author
 
-Created by **Weslley Harakawa** · [GitHub](https://github.com/WeslleyHarakawa) · [LinkedIn](https://www.linkedin.com/in/weslleyharakawa)
+**Weslley Harakawa** - Founder of ORYKSA AI and Chief Innovation Officer at Harakawa Tech. Based in Lisbon, Portugal. Specialties: artificial intelligence, web and mobile development, blockchain tokenization. Education: University of the People.
+
+- Website: https://harakawa.tech
+- LinkedIn: https://www.linkedin.com/in/weslleyharakawa/
+- Instagram: https://www.instagram.com/weslley.harakawa
+- ORYKSA AI Employees: https://oryksa.com (X: https://x.com/oryksa, Instagram: https://www.instagram.com/oryksaai, YouTube: https://www.youtube.com/@ORYKSAAI)
+
+---
 
 MIT License · ORYKSA AI Employees · W8 Atlantic Unipessoal Lda
