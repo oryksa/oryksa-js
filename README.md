@@ -17,7 +17,7 @@ npm install @oryksa/sdk
 
 ```js
 import { Oryksa } from "@oryksa/sdk";
-const oryksa = new Oryksa(process.env.ORYKSA_API_KEY); // Account > Developer
+const oryksa = new Oryksa(process.env.ORYKSA_API_KEY); // developer.oryksa.com > Keys
 
 const r = await oryksa.chat({ message: "Are you open on Saturday?" });
 console.log(r.reply, r.conversation_id);

@@ -1,6 +1,6 @@
 {
   "name": "@oryksa/sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ORYKSA AI Employees SDK: chat API, knowledge (Brain), webhooks and an in-app chat for web, Node and Electron.",
   "type": "module",
   "main": "src/index.js",
