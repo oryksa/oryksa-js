@@ -63,7 +63,7 @@ Every failed call throws `OryksaError` with `status`, `code` (for example `inter
 
 ## About the author
 
-**Weslley Harakawa** - Founder of ORYKSA AI and Chief Innovation Officer at Harakawa Tech. Based in Lisbon, Portugal. Specialties: artificial intelligence, web and mobile development, blockchain tokenization. Education: University of the People.
+**Weslley Harakawa** - Founder of ORYKSA AI. Based in Lisbon, Portugal. Specialties: artificial intelligence, web and mobile development, blockchain tokenization. Education: University of the People.
 
 - Website: https://harakawa.tech
 - LinkedIn: https://www.linkedin.com/in/weslleyharakawa/
