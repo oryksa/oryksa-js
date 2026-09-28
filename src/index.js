@@ -6,7 +6,7 @@
  */
 
 const DEFAULT_BASE = "https://api.oryksa.com/v1";
-export const VERSION = "0.1.2";
+export const VERSION = "0.1.3";
 
 export class OryksaError extends Error {
   constructor(status, code, message, extra = {}) {
