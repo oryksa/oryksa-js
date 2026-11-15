@@ -113,9 +113,12 @@ export class Oryksa {
     };
   }
 
-  /** Short-lived token for an app user. Send only this token to the app. */
-  createSession({ conversationId, customerName, ttlMinutes = 60 } = {}) {
-    return this._req("POST", "/sessions", { conversation_id: conversationId, customer_name: customerName, ttl_minutes: ttlMinutes });
+  /** Short-lived token for an app user. Send only this token to the app.
+   * For a user signed in to your app, pass customerEmail and/or customerPhone (with the country code):
+   * the AI then asks for no contact details and knows the customer is signed in. */
+  createSession({ conversationId, customerName, customerEmail, customerPhone, ttlMinutes = 60 } = {}) {
+    return this._req("POST", "/sessions", { conversation_id: conversationId, customer_name: customerName,
+      customer_email: customerEmail, customer_phone: customerPhone, ttl_minutes: ttlMinutes });
   }
 
   /**

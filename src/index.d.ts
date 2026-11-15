@@ -65,7 +65,7 @@ export declare class Oryksa {
     delete(id: string): Promise<any>;
     test(id: string): Promise<{ status: number; delivered: boolean }>;
   };
-  createSession(p?: { conversationId?: string; customerName?: string; ttlMinutes?: number }): Promise<{ client_token: string; conversation_id: string; expires_at: string }>;
+  createSession(p?: { conversationId?: string; customerName?: string; customerEmail?: string; customerPhone?: string; ttlMinutes?: number }): Promise<{ client_token: string; conversation_id: string; expires_at: string }>;
   learnApp(app: AppDescription): Promise<any>;
 }
 
