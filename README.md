@@ -2,6 +2,8 @@
 
 # @oryksa/sdk
 
+[![English](https://img.shields.io/badge/English-0891b2?style=for-the-badge)](README.md) [![Português](https://img.shields.io/badge/Portugu%C3%AAs-30363d?style=for-the-badge)](README.pt.md) [![Español](https://img.shields.io/badge/Espa%C3%B1ol-30363d?style=for-the-badge)](README.es.md) [![Français](https://img.shields.io/badge/Fran%C3%A7ais-30363d?style=for-the-badge)](README.fr.md)
+
 Official JavaScript and TypeScript SDK for **ORYKSA AI Employees**: put an AI employee that already knows the business inside your web app, Node backend or Electron desktop app. Same brain as WhatsApp and the website chat, text and voice.
 
 - Docs: https://developer.oryksa.com
@@ -44,6 +46,14 @@ app.get("/oryksa-token", requireLogin, async (req, res) => {
 import { OryksaClient, mountChat } from "@oryksa/sdk";
 const client = new OryksaClient({ getToken: async () => (await fetch("/oryksa-token").then(r => r.json())).token });
 mountChat({ client, lang: "en" }); // ready-made chat UI
+```
+
+## Colours and theme
+
+`mountChat` accepts three colors as CSS strings: `accent` (buttons, visitor bubbles, links), `ink` (main text) and `soft` (AI bubbles). Missing ones keep the default (`#5B57E0`, `#161B3D` and `#EEEBFB`). `position` (`"left"` or `"right"`) picks the side of the screen.
+
+```js
+mountChat({ client, lang: "en", accent: "#0E8A6B", ink: "#10281F", soft: "#E3F5EE" });
 ```
 
 ## Webhooks
