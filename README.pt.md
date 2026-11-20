@@ -13,7 +13,7 @@ SDK oficial de JavaScript e TypeScript da **ORYKSA AI Employees**: põe um colab
 
 ## Capturas de ecrã
 
-<p align="center"><img src="docs/screenshots/js_chat_pt.png" width="420" alt="Chat"> <img src="docs/screenshots/js_theme_pt.png" width="420" alt="Chat com o tema do README"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/oryksa/oryksa-js/main/docs/screenshots/js_chat_pt.png" width="420" alt="Chat"> <img src="https://raw.githubusercontent.com/oryksa/oryksa-js/main/docs/screenshots/js_theme_pt.png" width="420" alt="Chat com o tema do README"></p>
 
 Uma página de loja com `mountChat`, captada pelo CI no Chrome com uma conta de teste da ORYKSA (`test/shots.html`): cores de origem à esquerda e, à direita, o código de *Cores e tema*, mais abaixo.
 

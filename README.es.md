@@ -13,7 +13,7 @@ SDK oficial de JavaScript y TypeScript de **ORYKSA AI Employees**: pon un emplea
 
 ## Capturas de pantalla
 
-<p align="center"><img src="docs/screenshots/js_chat_en.png" width="420" alt="Chat"> <img src="docs/screenshots/js_theme_en.png" width="420" alt="Chat with the README theme"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/oryksa/oryksa-js/main/docs/screenshots/js_chat_en.png" width="420" alt="Chat"> <img src="https://raw.githubusercontent.com/oryksa/oryksa-js/main/docs/screenshots/js_theme_en.png" width="420" alt="Chat with the README theme"></p>
 
 Una página de tienda con `mountChat`, capturada por el CI en Chrome con una cuenta de prueba de ORYKSA (`test/shots.html`): colores por defecto a la izquierda y, a la derecha, el código de *Colores y tema*, más abajo.
 
