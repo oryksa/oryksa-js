@@ -4,6 +4,8 @@
 
 [![English](https://img.shields.io/badge/English-30363d?style=for-the-badge)](README.md) [![Português](https://img.shields.io/badge/Portugu%C3%AAs-30363d?style=for-the-badge)](README.pt.md) [![Español](https://img.shields.io/badge/Espa%C3%B1ol-0891b2?style=for-the-badge)](README.es.md) [![Français](https://img.shields.io/badge/Fran%C3%A7ais-30363d?style=for-the-badge)](README.fr.md)
 
+<p align="center"><a href="https://developer.oryksa.com/es/sdks"><img src="https://developer.oryksa.com/assets/img/sdk/oryksa-sdks-es.gif" width="760" alt="SDKs de ORYKSA: el chat y la voz de la IA en iOS, Android, Flutter, React Native y la web"></a></p>
+
 SDK oficial de JavaScript y TypeScript de **ORYKSA AI Employees**: pon un empleado de IA que ya conoce el negocio dentro de tu app web, tu backend Node o tu app de escritorio Electron. El mismo cerebro de WhatsApp y del chat del sitio web, en texto y voz.
 
 - Documentación: https://developer.oryksa.com
