@@ -1,0 +1,41 @@
+name: Screenshots
+on:
+  workflow_dispatch:
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: The README theme code runs in Chrome; screenshots at 1280x800 (2x)
+        env: { ORYKSA_TEST_TOKEN: "${{ secrets.ORYKSA_TEST_TOKEN }}" }
+        run: |
+          mkdir -p shots /tmp/pp
+          (python3 -m http.server 8080 >/dev/null 2>&1 &)
+          cd /tmp/pp && npm init -y >/dev/null && npm i puppeteer-core@23 >/dev/null 2>&1
+          cat > shot.js <<'JS'
+          const puppeteer = require('puppeteer-core');
+          (async () => {
+            const b = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+            for (const l of ['en', 'pt']) for (const s of ['chat', 'theme']) {
+              const p = await b.newPage();
+              const errors = [];
+              p.on('pageerror', e => errors.push(String(e)));
+              await p.setViewport({ width: 1280, height: 800, deviceScaleFactor: 2 });
+              const q = '?t=' + encodeURIComponent(process.env.ORYKSA_TEST_TOKEN) + '&lang=' + l + (s === 'theme' ? '&theme=1' : '');
+              await p.goto('http://localhost:8080/test/shots.html' + q, { waitUntil: 'networkidle0', timeout: 60000 });
+              await new Promise(r => setTimeout(r, 6000));
+              if (errors.length) { console.error(errors); process.exit(1); }
+              const accent = await p.evaluate(() => getComputedStyle(document.getElementById('oryksa-sdk-chat').shadowRoot.host).getPropertyValue('--accent').trim());
+              console.log(s, l, 'accent', accent);
+              await p.screenshot({ path: process.env.GITHUB_WORKSPACE + '/shots/js_' + s + '_' + l + '.png' });
+              await p.close();
+            }
+            await b.close();
+          })().catch(e => { console.error(e); process.exit(1); });
+          JS
+          node shot.js
+          ls -la "$GITHUB_WORKSPACE/shots"
+      - uses: actions/upload-artifact@v4
+        with: { name: js-screenshots, path: shots/*.png }

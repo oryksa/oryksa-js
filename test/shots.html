@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My store</title></head>
+<body style="margin:0;font-family:system-ui,sans-serif;background:#FDFAFF;color:#161B3D">
+<header style="padding:18px 40px;border-bottom:1px solid #ECEEF6;font-size:22px;font-weight:700">My store</header>
+<main style="display:flex;gap:40px;padding:40px">
+  <div style="width:420px;height:300px;border-radius:20px;background:#EFF3F8;display:flex;align-items:center;justify-content:center;font-size:110px">🏂</div>
+  <div><h1 style="margin:0 0 8px">Sky Beginner Snowboard</h1><div style="font-size:22px">489.95</div>
+  <button style="margin-top:20px;padding:12px 20px;border:0;border-radius:12px;background:#161B3D;color:#fff;font-size:16px">Add to cart</button></div>
+</main>
+<script type="module">
+// Used by the CI screenshots: ?t=<client token>&lang=en|pt&theme=1
+import { OryksaClient, mountChat } from "/src/index.js";
+const p = new URLSearchParams(location.search);
+const client = new OryksaClient({ token: p.get("t") });
+const lang = p.get("lang") || "en";
+if (p.get("theme")) {
+  // The "Colours and theme" code of the README
+  window.chat = mountChat({ client, lang, accent: "#0E8A6B", ink: "#10281F", soft: "#E3F5EE", open: true });
+} else {
+  window.chat = mountChat({ client, lang, open: true });
+}
+</script></body></html>
