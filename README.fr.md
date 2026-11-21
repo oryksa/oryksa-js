@@ -74,6 +74,30 @@ mountChat({
 
 `client.linkPreview(url)` donne le titre et la photo d'un lien (`null` quand il ne peut pas être lu) ; `linksIn(text)` et `withoutLinks(text)` sont aussi exportés.
 
+## Joindre une photo ou un document (0.1.5)
+
+Le chat de `mountChat` a un bouton pour joindre : photo de la galerie, appareil photo (téléphones et tablettes) ou document (PDF, Word, texte, CSV). Les photos sont réduites avant l'envoi (jusqu'à 2 Mo) ; documents jusqu'à 8 Mo. L'IA regarde la photo ou lit le document. À désactiver avec `attachments: false`. Par code : `client.send(texte, { image: { base64, mime } })` ou `{ file: { base64, name, mime } }`.
+
+## Vos propres fonctions d'IA : `ai` (0.1.5)
+
+Faites faire à l'IA ce dont votre app ou site a besoin (lire une photo, extraire des données, classer, traduire, rédiger) et payez en interactions ORYKSA : 1 par réponse. Votre prompt et votre JSON Schema restent dans votre code ; le jeton de session suffit (n'embarquez jamais la clé secrète). Aucune conversation n'est créée dans votre boîte.
+
+```js
+const r = await client.ai({
+  instructions: "Read the tyre on the photo: brand, model and size exactly as written on the sidewall. " +
+    "If the size is not legible, readable=false and size=null. Never invent.",
+  images: [{ base64: photoBase64, mime: "image/jpeg" }], // resized to 1600 px
+  schema: {
+    type: "object",
+    properties: { readable: { type: "boolean" }, brand: { type: ["string", "null"] }, size: { type: ["string", "null"] } },
+    required: ["readable", "brand", "size"],
+  },
+});
+if (r.json?.readable) showProducts(r.json.size);
+```
+
+`r.text` contient la réponse en texte, `r.json` l'objet (avec un schema) et `r.interactionsSpent` les interactions utilisées. Quand les interactions du forfait sont épuisées, l'appel échoue avec `OryksaError` status 402.
+
 ## Couleurs et thème
 
 `mountChat` accepte trois couleurs en texte CSS : `accent` (boutons, bulles du visiteur, liens), `ink` (texte principal) et `soft` (bulles de l'IA). Celles qui manquent gardent la valeur par défaut (`#5B57E0`, `#161B3D` et `#EEEBFB`). `position` (`"left"` ou `"right"`) choisit le côté de l'écran.

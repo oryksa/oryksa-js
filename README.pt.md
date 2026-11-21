@@ -74,6 +74,30 @@ mountChat({
 
 `client.linkPreview(url)` dá o título e a foto de um link (`null` quando não se consegue ler); `linksIn(text)` e `withoutLinks(text)` também são exportados.
 
+## Anexar uma foto ou um documento (0.1.5)
+
+O chat do `mountChat` tem um botão de anexar: foto da galeria, câmara (telemóveis e tablets) ou documento (PDF, Word, texto, CSV). As fotos são reduzidas antes de seguir (até 2 MB); documentos até 8 MB. A IA vê a foto ou lê o documento. Desliga com `attachments: false`. Por código: `client.send(texto, { image: { base64, mime } })` ou `{ file: { base64, name, mime } }`.
+
+## As tuas funções de IA: `ai` (0.1.5)
+
+Põe a IA a fazer o que a tua app ou site precisa (ler uma foto, extrair dados, classificar, traduzir, escrever) e paga com interações ORYKSA: 1 por resposta. O teu prompt e o teu JSON Schema ficam no teu código; basta o token de sessão (nunca leves a chave secreta). Não cria conversa na tua caixa.
+
+```js
+const r = await client.ai({
+  instructions: "Read the tyre on the photo: brand, model and size exactly as written on the sidewall. " +
+    "If the size is not legible, readable=false and size=null. Never invent.",
+  images: [{ base64: photoBase64, mime: "image/jpeg" }], // resized to 1600 px
+  schema: {
+    type: "object",
+    properties: { readable: { type: "boolean" }, brand: { type: ["string", "null"] }, size: { type: ["string", "null"] } },
+    required: ["readable", "brand", "size"],
+  },
+});
+if (r.json?.readable) showProducts(r.json.size);
+```
+
+`r.text` tem a resposta em texto, `r.json` o objeto (com schema) e `r.interactionsSpent` as interações gastas. Quando as interações do plano acabam, a chamada falha com `OryksaError` status 402.
+
 ## Cores e tema
 
 O `mountChat` aceita três cores como texto CSS: `accent` (botões, balões do visitante, ligações), `ink` (texto principal) e `soft` (balões da IA). As que faltarem mantêm o valor por omissão (`#5B57E0`, `#161B3D` e `#EEEBFB`). O `position` (`"left"` ou `"right"`) escolhe o lado do ecrã.

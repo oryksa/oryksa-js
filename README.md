@@ -74,6 +74,30 @@ mountChat({
 
 `client.linkPreview(url)` gives the title and picture of a link (`null` when it cannot be read); `linksIn(text)` and `withoutLinks(text)` are exported too.
 
+## Attach a photo or a document (0.1.5)
+
+The chat of `mountChat` has an attach button: a photo from the library, the camera (phones and tablets) or a document (PDF, Word, text, CSV). Photos are made smaller before they go (up to 2 MB); documents up to 8 MB. The AI looks at the photo or reads the document. Turn it off with `attachments: false`. From code: `client.send(text, { image: { base64, mime } })` or `{ file: { base64, name, mime } }`.
+
+## Your own AI features: `ai` (0.1.5)
+
+Have the AI do what your app or site needs (read a photo, extract data, classify, translate, write) and pay with ORYKSA interactions: 1 per answer. Your prompt and your JSON Schema live in your code; the session token is enough (never ship the secret key). It does not create a conversation in your inbox.
+
+```js
+const r = await client.ai({
+  instructions: "Read the tyre on the photo: brand, model and size exactly as written on the sidewall. " +
+    "If the size is not legible, readable=false and size=null. Never invent.",
+  images: [{ base64: photoBase64, mime: "image/jpeg" }], // resized to 1600 px
+  schema: {
+    type: "object",
+    properties: { readable: { type: "boolean" }, brand: { type: ["string", "null"] }, size: { type: ["string", "null"] } },
+    required: ["readable", "brand", "size"],
+  },
+});
+if (r.json?.readable) showProducts(r.json.size);
+```
+
+`r.text` has the answer as text, `r.json` the object (with a schema), `r.interactionsSpent` the interactions used. When the plan's interactions are used up the call rejects with `OryksaError` status 402.
+
 ## Colours and theme
 
 `mountChat` accepts three colors as CSS strings: `accent` (buttons, visitor bubbles, links), `ink` (main text) and `soft` (AI bubbles). Missing ones keep the default (`#5B57E0`, `#161B3D` and `#EEEBFB`). `position` (`"left"` or `"right"`) picks the side of the screen.

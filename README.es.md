@@ -74,6 +74,30 @@ mountChat({
 
 `client.linkPreview(url)` da el título y la foto de un enlace (`null` cuando no se puede leer); `linksIn(text)` y `withoutLinks(text)` también se exportan.
 
+## Adjuntar una foto o un documento (0.1.5)
+
+El chat de `mountChat` tiene un botón para adjuntar: foto de la galería, cámara (móviles y tabletas) o documento (PDF, Word, texto, CSV). Las fotos se reducen antes de enviarse (hasta 2 MB); documentos hasta 8 MB. La IA ve la foto o lee el documento. Se desactiva con `attachments: false`. Por código: `client.send(texto, { image: { base64, mime } })` o `{ file: { base64, name, mime } }`.
+
+## Tus funciones de IA: `ai` (0.1.5)
+
+Haz que la IA haga lo que tu app o web necesita (leer una foto, extraer datos, clasificar, traducir, escribir) y paga con interacciones ORYKSA: 1 por respuesta. Tu prompt y tu JSON Schema viven en tu código; basta el token de sesión (nunca lleves la clave secreta). No crea una conversación en tu bandeja.
+
+```js
+const r = await client.ai({
+  instructions: "Read the tyre on the photo: brand, model and size exactly as written on the sidewall. " +
+    "If the size is not legible, readable=false and size=null. Never invent.",
+  images: [{ base64: photoBase64, mime: "image/jpeg" }], // resized to 1600 px
+  schema: {
+    type: "object",
+    properties: { readable: { type: "boolean" }, brand: { type: ["string", "null"] }, size: { type: ["string", "null"] } },
+    required: ["readable", "brand", "size"],
+  },
+});
+if (r.json?.readable) showProducts(r.json.size);
+```
+
+`r.text` trae la respuesta en texto, `r.json` el objeto (con schema) y `r.interactionsSpent` las interacciones usadas. Cuando se agotan las interacciones del plan, la llamada falla con `OryksaError` status 402.
+
 ## Colores y tema
 
 `mountChat` acepta tres colores como texto CSS: `accent` (botones, burbujas del visitante, enlaces), `ink` (texto principal) y `soft` (burbujas de la IA). Los que falten mantienen el valor por defecto (`#5B57E0`, `#161B3D` y `#EEEBFB`). `position` (`"left"` o `"right"`) elige el lado de la pantalla.
