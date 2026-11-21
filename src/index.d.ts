@@ -77,16 +77,52 @@ export interface AgentInfo {
   voice_replies: boolean; conversation_id: string;
 }
 
+/** Title and picture of a link of the business's own site (OryksaClient.linkPreview). */
+export interface LinkPreview {
+  object: "link_preview";
+  url: string;
+  /** Title of the page (empty for other sites). */
+  title: string;
+  /** Picture of the page (empty when it has none). */
+  image: string;
+  /** Name of the site. */
+  site: string;
+  /** Price, when the page says it (shops). */
+  price: string;
+}
+
+/**
+ * What your app does with a link the AI gave (a product, a service, a page). Return true when your app
+ * opened it itself (for example its own product page); return false and it opens in a new tab.
+ */
+export type LinkHandler = (url: string) => boolean;
+
 export declare class OryksaClient {
   constructor(opts: { token?: string; getToken?: () => Promise<string>; baseUrl?: string; fetch?: typeof fetch; timeoutMs?: number });
   agent(): Promise<AgentInfo>;
   send(message: string): Promise<ChatReply>;
   messages(): Promise<{ id: string; messages: Message[] }>;
+  /** Title and picture of a link the AI gave (only the pages of the business's own site); null when it cannot be read, never throws. */
+  linkPreview(url: string): Promise<LinkPreview | null>;
 }
 
 export declare function mountChat(opts: {
   client: OryksaClient; lang?: "en" | "pt" | "br" | "es"; position?: "left" | "right";
   accent?: string; ink?: string; soft?: string; open?: boolean;
+  /** What your app does with a link the AI gave: return true when your app opened it, false to open it in a new tab. */
+  onLink?: LinkHandler;
 }): { open(): void; close(): void; send(text: string): Promise<void>; destroy(): void };
+
+/** The distinct web links of text, in order, without the final punctuation (at most max, 3 by default). */
+export declare function linksIn(text: string, max?: number): string[];
+
+/** text without its web links (what a voice screen shows while she speaks). */
+export declare function withoutLinks(text: string): string;
+
+/** text as parts: url only on the links (web, and e-mail as mailto:). */
+export declare function linkParts(text: string): { text: string; url: string | null }[];
+
+/** Opens a link: handler first (true = your app opened it), then a new tab (window.open, noopener). */
+export declare function openLink(url: string, handler?: LinkHandler): void;
 
 export default Oryksa;

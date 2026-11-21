@@ -56,6 +56,24 @@ const client = new OryksaClient({ getToken: async () => (await fetch("/oryksa-to
 mountChat({ client, lang: "en" }); // ready-made chat UI
 ```
 
+## Links com botão Abrir (0.1.5)
+
+Os links que a IA dá ficam clicáveis no chat (endereços web e e-mails), e cada link web ganha um cartão por baixo da resposta com a foto e o título da página e um botão **Abrir** (as páginas do teu próprio site, os domínios do teu chat do site; outros sites mostram o endereço). Passa `onLink` para abrir as tuas próprias páginas, por exemplo a página do produto: devolve true quando a tua app o abriu, false para o abrir num separador novo.
+
+```js
+mountChat({
+  client, lang: "pt",
+  onLink: (url) => {
+    const id = myProductIdOf(url); // as tuas rotas
+    if (!id) return false;
+    router.push("/product/" + id);
+    return true;
+  },
+});
+```
+
+`client.linkPreview(url)` dá o título e a foto de um link (`null` quando não se consegue ler); `linksIn(text)` e `withoutLinks(text)` também são exportados.
+
 ## Cores e tema
 
 O `mountChat` aceita três cores como texto CSS: `accent` (botões, balões do visitante, ligações), `ink` (texto principal) e `soft` (balões da IA). As que faltarem mantêm o valor por omissão (`#5B57E0`, `#161B3D` e `#EEEBFB`). O `position` (`"left"` ou `"right"`) escolhe o lado do ecrã.

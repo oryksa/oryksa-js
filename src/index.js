@@ -6,7 +6,7 @@
  */
 
 const DEFAULT_BASE = "https://api.oryksa.com/v1";
-export const VERSION = "0.1.4";
+export const VERSION = "0.1.5";
 
 export class OryksaError extends Error {
   constructor(status, code, message, extra = {}) {
@@ -188,6 +188,7 @@ export class OryksaClient {
     this._base = (baseUrl || DEFAULT_BASE).replace(/\/$/, "");
     this._fetch = fetch;
     this._timeout = timeoutMs || 60000;
+    this._previews = new Map();
   }
 
   async _tok(force) {
@@ -209,7 +210,109 @@ export class OryksaClient {
   agent() { return this._req("GET", "/client/agent"); }
   send(message) { return this._req("POST", "/client/chat", { message }); }
   messages() { return this._req("GET", "/client/messages"); }
+
+  /**
+   * Title and picture of a link the AI gave, for the card under her reply:
+   * { object: "link_preview", url, title, image, site, price }. Only the pages of the business's own
+   * site (its website chat domains) get a title and a picture. Resolves null when it cannot be read;
+   * never throws. Kept in memory for this client.
+   */
+  async linkPreview(url) {
+    const key = String(url || "");
+    if (this._previews.has(key)) return this._previews.get(key);
+    try {
+      const d = (await this._req("GET", "/client/link-preview?url=" + encodeURIComponent(key))) || {};
+      const str = (v) => (v === null || v === undefined ? "" : String(v));
+      const p = { object: "link_preview", url: str(d.url), title: str(d.title), image: str(d.image), site: str(d.site), price: str(d.price) };
+      if (this._previews.size > 200) this._previews.clear();
+      this._previews.set(key, p);
+      return p;
+    } catch (_) {
+      return null;
+    }
+  }
 }
+
+/* ------------------------------------------------------------------ Links of the AI's replies */
+const URL_RE = /https?:\/\/[^\s<>"'\)\]]+/gi;
+const MAIL_RE = /[\w.+-]+@[\w-]+(\.[\w-]+)+/g;
+
+/** Every match of re in s (a fresh copy of the regular expression, so no state is shared). */
+function allMatches(re, s) {
+  const r = new RegExp(re.source, re.flags);
+  const out = [];
+  let m;
+  while ((m = r.exec(s)) !== null) {
+    out.push(m);
+    if (m[0] === "") r.lastIndex++;
+  }
+  return out;
+}
+
+const trimEnd = (u) => u.replace(/[.,;:!?…]+$/, "");
+
+/** The distinct web links of text, in order, without the punctuation that ends the sentence (at most max). */
+export function linksIn(text, max = 3) {
+  const out = [];
+  for (const m of allMatches(URL_RE, String(text || ""))) {
+    const u = trimEnd(m[0]);
+    if (!out.includes(u)) out.push(u);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
+/** text without its web links (what a voice screen shows: the link is on the button). */
+export function withoutLinks(text) {
+  return String(text || "")
+    .replace(URL_RE, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([.,;!?])/g, "$1")
+    .replace(/:\s*$/gm, "")
+    .trim();
+}
+
+/** text as parts { text, url }: url only on the links (web, and e-mail as mailto:). */
+export function linkParts(text) {
+  const s = String(text || "");
+  const hits = [];
+  for (const m of allMatches(URL_RE, s)) {
+    const u = trimEnd(m[0]);
+    hits.push({ start: m.index, end: m.index + u.length, url: u });
+  }
+  for (const m of allMatches(MAIL_RE, s)) {
+    const start = m.index, end = m.index + m[0].length;
+    if (hits.some((x) => start < x.end && end > x.start)) continue;
+    hits.push({ start, end, url: "mailto:" + m[0] });
+  }
+  hits.sort((a, b) => a.start - b.start);
+  const out = [];
+  let at = 0;
+  for (const x of hits) {
+    if (x.start < at) continue;
+    if (x.start > at) out.push({ text: s.slice(at, x.start), url: null });
+    out.push({ text: s.slice(x.start, x.end), url: x.url });
+    at = x.end;
+  }
+  if (at < s.length) out.push({ text: s.slice(at), url: null });
+  return out;
+}
+
+/**
+ * Opens a link: your handler first (return true when your app opened it, for example its own product
+ * page), then a new tab (window.open with noopener).
+ */
+export function openLink(url, handler) {
+  if (handler && handler(url) === true) return;
+  if (typeof window !== "undefined" && window.open) window.open(url, "_blank", "noopener");
+}
+
+const hostOf = (url) => {
+  const m = /^[a-z][a-z0-9+.-]*:\/\/([^/?#:]+)/i.exec(String(url || ""));
+  return m ? m[1].replace(/^www\./i, "") : "";
+};
 
 /* ------------------------------------------------------------------ Browser chat UI */
 const CSS = `
@@ -236,18 +339,32 @@ input{flex:1;border:0;padding:14px 16px;font-size:14px;outline:none;color:var(--
 form button{border:0;background:var(--accent);color:#fff;font-weight:800;padding:0 18px;letter-spacing:.1em;cursor:pointer}
 .pw{text-align:center;font-size:10.5px;letter-spacing:.12em;color:#9ca3af;padding:6px 0 8px;text-transform:uppercase}
 .pw b{color:var(--accent)}
+.m a{text-decoration:underline;cursor:pointer;word-break:break-all}
+.m.a a{color:var(--accent)}
+.m.u a{color:#fff}
+.lk{align-self:flex-start;width:86%;display:flex;align-items:center;gap:10px;padding:8px;border:1px solid #e5e7eb;border-radius:14px;background:#fff;cursor:pointer;margin-top:-4px}
+.lk .pic{flex:none;width:52px;height:52px;border-radius:10px;background:#e5e7eb;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#6b7280}
+.lk .pic img{width:100%;height:100%;object-fit:cover}
+.lk .tx{flex:1;min-width:0}
+.lk .tt{font-size:13.5px;line-height:1.3;font-weight:700;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.lk .sb{font-size:11.5px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk button{flex:none;border:0;background:var(--accent);color:#fff;border-radius:999px;min-height:36px;padding:0 14px;font-size:13px;font-weight:700;cursor:pointer}
 `;
 
+const LINK_ICON = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+
 const UI_TXT = {
-  en: { talk: "Talk to", ph: "Type your question", send: "Send", err: "Sorry, something went wrong. Try again." },
-  pt: { talk: "Falar com", ph: "Escreve a tua pergunta", send: "Enviar", err: "Desculpa, algo correu mal. Tenta de novo." },
-  br: { talk: "Falar com", ph: "Digite sua pergunta", send: "Enviar", err: "Desculpe, algo deu errado. Tente de novo." },
-  es: { talk: "Hablar con", ph: "Escribe tu pregunta", send: "Enviar", err: "Lo siento, algo salió mal. Inténtalo de nuevo." },
+  en: { talk: "Talk to", ph: "Type your question", send: "Send", err: "Sorry, something went wrong. Try again.", open: "Open" },
+  pt: { talk: "Falar com", ph: "Escreve a tua pergunta", send: "Enviar", err: "Desculpa, algo correu mal. Tenta de novo.", open: "Abrir" },
+  br: { talk: "Falar com", ph: "Digite sua pergunta", send: "Enviar", err: "Desculpe, algo deu errado. Tente de novo.", open: "Abrir" },
+  es: { talk: "Hablar con", ph: "Escribe tu pregunta", send: "Enviar", err: "Lo siento, algo salió mal. Inténtalo de nuevo.", open: "Abrir" },
 };
 
 /**
  * Mount the ORYKSA chat inside a web app (same look as the website chat).
- * @param {{client: OryksaClient, lang?: 'en'|'pt'|'br'|'es', position?: 'left'|'right', accent?: string, ink?: string, soft?: string, open?: boolean}} opts
+ * onLink(url): what your app does with a link the AI gave; return true when your app opened it,
+ * otherwise it opens in a new tab.
+ * @param {{client: OryksaClient, lang?: 'en'|'pt'|'br'|'es', position?: 'left'|'right', accent?: string, ink?: string, soft?: string, open?: boolean, onLink?: (url: string) => boolean}} opts
  */
 export function mountChat(opts) {
   if (typeof document === "undefined") throw new Error("mountChat runs in a browser. In React Native use @oryksa/react-native.");
@@ -270,11 +387,53 @@ export function mountChat(opts) {
   const panel = $(".panel"), msgs = $(".msgs"), sug = $(".sug"), input = $("input");
   input.placeholder = tx.ph;
   $("form button").textContent = tx.send;
+  const onLink = opts.onLink;
+  // The links of a message can be tapped (web and e-mail): your onLink first, then the browser.
+  const fill = (d, text) => {
+    for (const p of linkParts(text)) {
+      if (!p.url) { d.appendChild(document.createTextNode(p.text)); continue; }
+      const a = document.createElement("a");
+      a.href = p.url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = p.text;
+      a.addEventListener("click", (e) => { if (onLink && onLink(p.url) === true) e.preventDefault(); });
+      d.appendChild(a);
+    }
+  };
+  // The card under a reply for each web link: picture, title (from ORYKSA) and an Open button.
+  const card = (url) => {
+    const c = document.createElement("div");
+    c.className = "lk";
+    c.innerHTML = '<div class="pic">' + LINK_ICON + '</div><div class="tx"><div class="tt"></div><div class="sb"></div></div><button type="button"></button>';
+    const site = hostOf(url);
+    const tt = c.querySelector(".tt"), sb = c.querySelector(".sb"), btn = c.querySelector("button");
+    tt.textContent = site; sb.textContent = site; btn.textContent = tx.open;
+    btn.setAttribute("aria-label", tx.open + ": " + site);
+    const open = (e) => { e.stopPropagation(); openLink(url, onLink); };
+    c.addEventListener("click", open);
+    btn.addEventListener("click", open);
+    Promise.resolve(client.linkPreview ? client.linkPreview(url) : null).then((p) => {
+      if (!p) return;
+      const title = p.title || site;
+      tt.textContent = title;
+      sb.textContent = p.price ? p.price + " · " + p.site : (p.site || site);
+      btn.setAttribute("aria-label", tx.open + ": " + title);
+      if (/^https?:\/\//i.test(p.image || "")) {
+        const img = document.createElement("img");
+        img.alt = "";
+        img.src = p.image;
+        img.onload = () => { const pic = c.querySelector(".pic"); pic.textContent = ""; pic.appendChild(img); };
+      }
+    }).catch(() => {});
+    return c;
+  };
   const add = (role, text) => {
     const d = document.createElement("div");
     d.className = "m " + (role === "user" ? "u" : role === "typing" ? "a t" : "a");
-    d.textContent = text;
+    if (role === "typing") d.textContent = text; else fill(d, text);
     msgs.appendChild(d);
+    if (role !== "user" && role !== "typing") for (const u of linksIn(text)) msgs.appendChild(card(u));
     msgs.scrollTop = msgs.scrollHeight;
     return d;
   };
